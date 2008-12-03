@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.2
-%define taglevel 1
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
