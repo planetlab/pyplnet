@@ -4,7 +4,7 @@
  * Mark Huang <mlhuang@cs.princeton.edu>
  * Copyright (C) 2006 The Trustees of Princeton University
  *
- * $Id: sioc.c 9692 2008-06-25 08:49:22Z thierry $
+ * $Id$
  */
 
 #include <Python.h>
