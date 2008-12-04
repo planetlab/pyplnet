@@ -56,6 +56,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 
         elif network['method'] == "dhcp":
             inter['BOOTPROTO'] = "dhcp"
+            inter['PERSISTENT_DHCLIENT'] = "yes"
             if network['hostname']:
                 inter['DHCP_HOSTNAME'] = network['hostname']
             else:
