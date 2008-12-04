@@ -9,7 +9,7 @@ import tempfile
 import sioc
 import modprobe
 
-def InitInterfaces(logger, plc, data, root="", files_only=False):
+def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeManager"):
     sysconfig = "%s/etc/sysconfig/network-scripts" % root
 
     # query running network interfaces
@@ -126,7 +126,10 @@ def InitInterfaces(logger, plc, data, root="", files_only=False):
             interfaces[ifname] = inter
                 
     m = modprobe.Modprobe()
-    m.input("%s/etc/modprobe.conf" % root)
+    try:
+        m.input("%s/etc/modprobe.conf" % root, program)
+    except:
+        pass
     for (dev, inter) in interfaces.iteritems():
         # get the driver string "moduleName option1=a option2=b"
         driver=inter.get('DRIVER','')
@@ -286,16 +289,18 @@ if __name__ == "__main__":
     import optparse
     import sys
 
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(usage="plnet [-v] [-f] [-p <program>] -r root node_id")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
     parser.add_option("-r", "--root", action="store", type="string",
                       dest="root", default=None)
     parser.add_option("-f", "--files-only", action="store_true",
                       dest="files_only")
+    parser.add_option("-p", "--program", action="store", type="string",
+                      dest="program", default="plnet")
     (options, args) = parser.parse_args()
     if len(args) != 1 or options.root is None:
-        print >>sys.stderr, \
-            "Usage: %s [-v] [-f] -r <root> node_id" % sys.argv[0]
+        print >>sys.stderr, "Missing root or node_id"
+        parser.print_help()
         sys.exit(1)
 
     node = shell.GetNodes({'node_id': [int(args[0])]})

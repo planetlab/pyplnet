@@ -11,7 +11,7 @@ class Modprobe():
     def __init__(self,filename="/etc/modprobe.conf"):
         self.conffile = {}
         self.origconffile = {}
-        for keyword in ("alias","options","install","remove","blacklist","MODULES"):
+        for keyword in ("alias","options","install","remove","blacklist","MODULES","#"):
             self.conffile[keyword]={}
         self.filename = filename
 
@@ -24,7 +24,7 @@ class Modprobe():
 
             table = self.conffile.get(command,None)
             if table == None:
-                print "WARNING: command %s not recognize. Ignoring!" % command
+                print "WARNING: command %s not recognized. Ignoring!" % command
                 continue
 
             if command == "alias":
