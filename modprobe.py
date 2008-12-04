@@ -5,6 +5,7 @@
 """Modprobe is a utility to read/modify/write /etc/modprobe.conf"""
 
 import os
+import tempfile
 
 class Modprobe():
     def __init__(self,filename="/etc/modprobe.conf"):
@@ -80,8 +81,8 @@ class Modprobe():
             return False
 
     def output(self,filename="/etc/modprobe.conf",program="NodeManager"):
-        tmpnam = os.tmpnam()
-        fb = file(tmpnam,"w")
+        (fd, tmpnam) = tempfile.mkstemp(dir=os.path.dirname(filename))
+        fb = os.fdopen(fd, "w")
         fb.write("# Written out by %s\n" % program)
 
         for command in ("alias","options","install","remove","blacklist"):
