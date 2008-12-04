@@ -99,6 +99,7 @@ class Modprobe():
             os.chmod(filename,0644)
             return True
         else:
+            os.unlink(tmpnam)
             return False
 
     def probe(self,name):
