@@ -1,3 +1,4 @@
+#!/usr/bin/python /usr/bin/plcsh
 # $Id$
 
 import os
@@ -166,8 +167,9 @@ def InitInterfaces(logger, plc, data, root="", files_only=False):
         for ifcfg in ifcfgs:
             dev = ifcfg[len('ifcfg-'):]
             path = "%s/ifcfg-%s" % (sysconfig,dev)
-            logger.verbose("net:InitInterfaces removing %s %s"%(dev,path))
-            os.system("/sbin/ifdown %s" % dev)
+            if not files_only:
+                logger.verbose("net:InitInterfaces removing %s %s"%(dev,path))
+                os.system("/sbin/ifdown %s" % dev)
             deletedSomething=True
             os.unlink(path)
 
@@ -230,11 +232,12 @@ def InitInterfaces(logger, plc, data, root="", files_only=False):
             
         elif not comparefiles(tmpnam,path):
             logger.verbose('net:InitInterfaces Configuration change for %s' % dev)
-            logger.verbose('net:InitInterfaces ifdown %s' % dev)
-            # invoke ifdown for the old configuration
-            os.system("/sbin/ifdown %s" % dev)
-            # wait a few secs for ifdown to complete
-            time.sleep(2)
+            if not files_only:
+                logger.verbose('net:InitInterfaces ifdown %s' % dev)
+                # invoke ifdown for the old configuration
+                os.system("/sbin/ifdown %s" % dev)
+                # wait a few secs for ifdown to complete
+                time.sleep(2)
 
             logger.log('replacing configuration for %s' % dev)
             # replace ifcfg-$dev configuration file
@@ -275,6 +278,37 @@ def InitInterfaces(logger, plc, data, root="", files_only=False):
         # handle those correctly
         if getvar("SLAVE") == 'yes': continue
 
-        logger.verbose('net:InitInterfaces bringing up %s' % dev)
-        os.system("/sbin/ifup %s" % dev)
+        if not files_only:
+            logger.verbose('net:InitInterfaces bringing up %s' % dev)
+            os.system("/sbin/ifup %s" % dev)
 
+if __name__ == "__main__":
+    import optparse
+    import sys
+
+    parser = optparse.OptionParser()
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose")
+    parser.add_option("-r", "--root", action="store", type="string",
+                      dest="root", default=None)
+    parser.add_option("-f", "--files-only", action="store_true",
+                      dest="files_only")
+    (options, args) = parser.parse_args()
+    if len(args) != 1 or options.root is None:
+        print >>sys.stderr, \
+            "Usage: %s [-v] [-f] -r <root> node_id" % sys.argv[0]
+        sys.exit(1)
+
+    node = shell.GetNodes({'node_id': [int(args[0])]})
+    networks = shell.GetInterfaces({'interface_id': node[0]['interface_ids']})
+
+    data = {'hostname': node[0]['hostname'], 'networks': networks}
+    class logger:
+        def __init__(self, verbose):
+            self.verbosity = verbose
+        def log(self, msg, loglevel=2):
+            if self.verbosity:
+                print msg
+        def verbose(self, msg):
+            self.log(msg, 1)
+    l = logger(options.verbose)
+    InitInterfaces(l, shell, data, options.root, options.files_only)
