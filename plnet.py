@@ -5,12 +5,18 @@ import os
 import socket
 import time
 import tempfile
+import errno
 
 import sioc
 import modprobe
 
 def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeManager"):
     sysconfig = "%s/etc/sysconfig/network-scripts" % root
+    try:
+        os.makedirs(sysconfig)
+    except OSError, e:
+        if e.errno != errno.EEXIST:
+            raise e
 
     # query running network interfaces
     devs = sioc.gifconf()
@@ -187,7 +193,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         time.sleep(2)
 
     # Write network configuration file
-    networkconf = file("%s/etc/sysconfig/network", "w")
+    networkconf = file("%s/etc/sysconfig/network" % root, "w")
     networkconf.write("NETWORKING=yes\nHOSTNAME=%s\n" % hostname)
     if gateway is not None:
         networkconf.write("GATEWAY=%s\n" % gateway)
