@@ -48,6 +48,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         inter['USERCTL']='no'
         if network['mac']:
             inter['HWADDR'] = network['mac']
+        if network['is_primary']:
+            inter['PRIMARY']='yes'
 
         if network['method'] == "static":
             inter['BOOTPROTO'] = "static"
