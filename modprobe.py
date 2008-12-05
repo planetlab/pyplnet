@@ -7,7 +7,7 @@
 import os
 import tempfile
 
-class Modprobe():
+class Modprobe:
     def __init__(self,filename="/etc/modprobe.conf"):
         self.conffile = {}
         self.origconffile = {}
