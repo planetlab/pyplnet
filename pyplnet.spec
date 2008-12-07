@@ -42,7 +42,7 @@ python setup.py build
 rm -rf $RPM_BUILD_ROOT
 python setup.py install --skip-build --root "$RPM_BUILD_ROOT"
 chmod +x $RPM_BUILD_ROOT/%{python_sitearch}/plnet.py
-mkdir -p $RPM_BUILD_ROOT/%{_bindir}/plnet
+mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 ln -s %{python_sitearch}/plnet.py $RPM_BUILD_ROOT/%{_bindir}/plnet
 
 %clean
