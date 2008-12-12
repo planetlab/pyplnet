@@ -9,7 +9,7 @@
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Summary: PlanetLab Network Configuration library
 Name: %{name}
@@ -27,6 +27,7 @@ URL: %(echo %{url} | cut -d ' ' -f 2)
 
 Requires: python >= 2.4
 BuildRequires: python, python-devel
+BuildArch: noarch
 
 %description
 pyplnet is used to write the network configuration files based on the
@@ -41,9 +42,9 @@ python setup.py build
 %install
 rm -rf $RPM_BUILD_ROOT
 python setup.py install --skip-build --root "$RPM_BUILD_ROOT"
-chmod +x $RPM_BUILD_ROOT/%{python_sitearch}/plnet.py
+chmod +x $RPM_BUILD_ROOT/%{python_sitelib}/plnet.py
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-ln -s %{python_sitearch}/plnet.py $RPM_BUILD_ROOT/%{_bindir}/plnet
+ln -s %{python_sitelib}/plnet.py $RPM_BUILD_ROOT/%{_bindir}/plnet
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,7 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/plnet
-%{python_sitearch}/*
+%{python_sitelib}/*
 
 %changelog
 * Tue Dec  2 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.3-1

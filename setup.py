@@ -46,12 +46,10 @@ class bdist_rpmspec(Command):
 setup(
     name='pyplnet',
     version='4.3',
-    ext_modules=[
-    Extension('sioc', ['sioc.c']),
-    ],
     py_modules=[
     'plnet',
     'modprobe',
+    'sioc',
     ],
     cmdclass={'sdist': my_sdist, 'bdist_rpmspec': bdist_rpmspec},
     )
