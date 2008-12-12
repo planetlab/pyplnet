@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.2
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,5 +55,12 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Sat Dec 13 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.2-1
+- Rewrite sioc in Python.
+- Add a plnet symlink to make it easier to run the script via plcsh.
+- Set DNS servers/gateway for static configurations.
+- Work with an empty tree.
+- Use tempfile for temporary files.
+
 * Tue Dec  2 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.2-1
 - initial release
