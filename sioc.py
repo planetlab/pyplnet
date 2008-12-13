@@ -33,7 +33,10 @@ def gifaddr(interface):
     return None
 
 def gifconf():
-    interfaces = os.listdir("/sys/class/net")
+    try:
+        interfaces = os.listdir("/sys/class/net")
+    except:
+        interfaces = []
     s = None
     ret = {}
     try:
