@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.2
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,10 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Mon Dec 15 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.2-2
+- Work on PLCs running in Linux-VServer guests or other environments where /sys
+- isn't mounted.
+
 * Sat Dec 13 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.2-1
 - Rewrite sioc in Python.
 - Add a plnet symlink to make it easier to run the script via plcsh.
