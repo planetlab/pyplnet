@@ -10,7 +10,12 @@ import errno
 import sioc
 import modprobe
 
+global version
+version = 4.3
+
 def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeManager"):
+    global version
+
     sysconfig = "%s/etc/sysconfig/network-scripts" % root
     try:
         os.makedirs(sysconfig)
@@ -77,10 +82,25 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             if not network['is_primary']:
                 inter['DHCLIENTARGS'] = "-R subnet-mask"
 
-        if len(network['interface_tag_ids']) > 0:
+        try:
+            plc.GetInterfaceTags()
+            version = 4.3
+        except AttributeError:
+            version = 4.2
+
+        if version == 4.3:
+            interface_tag_ids = "interface_tag_ids"
+            interface_tag_id = "interface_tag_id"
+        else:
+            interface_tag_ids = "nodenetwork_setting_ids"
+            interface_tag_id = "nodenetwork_setting_id"
+
+        if len(network[interface_tag_ids]) > 0:
             try:
-                settings = plc.GetInterfaceTags({'interface_tag_id':
-                                                 network['interface_tag_ids']})
+                if version == 4.3:
+                    settings = plc.GetInterfaceTags({interface_tag_id:network[interface_tag_ids]})
+                else:
+                    settings = plc.GetNodeNetworkSettings({interface_tag_id:network[interface_tag_ids]})
             except:
                 logger.log("net:InitInterfaces FATAL: failed call GetInterfaceTags({'interface_tag_id':{%s})"% \
                            network['interface_tag_ids'])
@@ -325,7 +345,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     node = shell.GetNodes({'node_id': [int(args[0])]})
-    networks = shell.GetInterfaces({'interface_id': node[0]['interface_ids']})
+    try:
+        networks = shell.GetInterfaces({'interface_id': node[0]['interface_ids']})
+    except AttributeError:
+        networks = shell.GetNodeNetworks({'nodenetwork_id':node[0]['nodenetwork_ids']})
+        version = 4.2
+
 
     data = {'hostname': node[0]['hostname'], 'networks': networks}
     class logger:
