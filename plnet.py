@@ -141,7 +141,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                 
     m = modprobe.Modprobe()
     try:
-        m.input("%s/etc/modprobe.conf" % root, program)
+        m.input("%s/etc/modprobe.conf" % root)
     except:
         pass
     for (dev, inter) in interfaces.iteritems():
@@ -154,7 +154,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             options=" ".join(driver[1:])
             if options <> '':
                 m.optionsset(dev,options)
-    m.output("%s/etc/modprobe.conf" % root)
+    m.output("%s/etc/modprobe.conf" % root, program)
 
     # clean up after any ifcfg-$dev script that's no longer listed as
     # part of the NodeNetworks associated with this node
