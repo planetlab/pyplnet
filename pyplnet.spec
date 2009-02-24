@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.2
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,19 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Tue Feb 24 2009 Marc Fiuczynski <mef@cs.princeton.edu> - pyplnet-4.2-3
+- BUGFIX: the "program" argument needs to go with the the m.output() method.
+- The bug is that the m.input() method does not take two args and python
+- will raise an exception to indicate this.  However, the m.input()
+- method was wrapped in a
+- try:
+- m.input(a,b)
+- except:
+- pass
+- which masked this error.  The mainly visible side effect is that the
+- specific modprobe.conf file is not parsed and so any previously
+- written aliases and options are lost.
+
 * Mon Dec 15 2008 Daniel Hokka Zakrisson <daniel@hozac.com> - pyplnet-4.2-2
 - Work on PLCs running in Linux-VServer guests or other environments where /sys
 - isn't mounted.
