@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.2
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,12 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Wed Apr 15 2009 Marc Fiuczynski <mef@cs.princeton.edu> - pyplnet-4.2-4
+- - reimplementation of the ModProbe class to be more robust in parsing
+- modprobe/blacklist files.
+- - blacklist get/set methods
+- - supports "include" modprobe command
+
 * Tue Feb 24 2009 Marc Fiuczynski <mef@cs.princeton.edu> - pyplnet-4.2-3
 - BUGFIX: the "program" argument needs to go with the the m.output() method.
 - The bug is that the m.input() method does not take two args and python
