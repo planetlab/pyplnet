@@ -165,12 +165,19 @@ class Modprobe:
          
 if __name__ == '__main__':
     import sys
+    m = Modprobe()
     if len(sys.argv)>1:
-        m = Modprobe(sys.argv[1])
+        fn = sys.argv[1]
     else:
-        m = Modprobe()
+        fn = "/etc/modprobe.conf"
 
     m.input()
-    m.aliasset("bond0","bonding")
-    m.optionsset("bond0","miimon=100")
-    m.output("/tmp/x")
+
+    blacklist = Modprobe()
+    blacklistfiles = ("blacklist","blacklist-compat","blacklist-firewire")
+    for blf in blacklistfiles:
+        if os.path.exists("/etc/modprobe.d/%s"%blf):
+            blacklist.input("/etc/modprobe.d/%s"%blf)
+
+    m.output("/tmp/%s-tmp"%os.path.basename(fn),"TEST")
+    blacklist.output("/tmp/blacklist-tmp.txt","TEST")
