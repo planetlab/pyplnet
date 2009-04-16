@@ -109,11 +109,15 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 
             for setting in settings:
                 # to explicitly set interface name
-                settingname = setting['name'].upper()
+                name_key = "name"
+                if version == 4.3:
+                    name_key = "tagname"
+                    
+                settingname = setting[name_key].upper()
                 if settingname in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER'):
                     inter[settingname]=setting['value']
                 else:
-                    logger.log("net:InitInterfaces WARNING: ignored setting named %s"%setting['name'])
+                    logger.log("net:InitInterfaces WARNING: ignored setting named %s"%setting[name_key])
 
         # support aliases to interfaces either by name or HWADDR
         if 'ALIAS' in inter:
