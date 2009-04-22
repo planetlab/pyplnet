@@ -116,6 +116,13 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                 settingname = setting[name_key].upper()
                 if settingname in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER'):
                     inter[settingname]=setting['value']
+                # wireless settings
+                elif settingname in \
+                        [  "MODE", "ESSID", "NW", "FREQ", "CHANNEL", "SENS", "RATE",
+                           "KEY", "KEY1", "KEY2", "KEY3", "KEY4", "SECURITYMODE", 
+                           "IWCONFIG", "IWPRIV" ] :
+                    inter [settingname] = setting['value']
+                    inter ['TYPE']='Wireless'
                 else:
                     logger.log("net:InitInterfaces WARNING: ignored setting named %s"%setting[name_key])
 
