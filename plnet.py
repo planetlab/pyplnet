@@ -37,6 +37,23 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
     gateway = None
     networks = data['networks']
     failedToGetSettings = False
+
+    # NOTE: GetInterfaces/NodeNetworks does not necessarily order the interfaces
+    # returned.  Because 'interface'is decremented as each interface is processed,
+    # by the time is_primary=True (primary) interface is reached, the device
+    # "eth%s" % interface, is not eth0.  But, something like eth-4, or eth-12.
+    # This code sorts the interfaces, implicitly placing the primary (first created)
+    # interface first.  There is a lot of room for improvement to how this
+    # script handles interfaces and how it chooses the primary interface.
+    def compare_by (fieldname):
+        def compare_two_dicts (a, b):
+            return cmp(a[fieldname], b[fieldname])
+        return compare_two_dicts
+    if version == 4.3:
+        networks.sort( compare_by('interface_id') )
+    else:
+        networks.sort( compare_by('nodenetwork_id') )
+
     for network in networks:
     	logger.verbose('net:InitInterfaces interface %d: %s'%(interface,network))
     	logger.verbose('net:InitInterfaces macs = %s' % macs)
