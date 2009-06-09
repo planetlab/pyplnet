@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.3
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,10 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Tue Jun 09 2009 Stephen Soltesz <soltesz@cs.princeton.edu> - pyplnet-4.3-3
+- this patch addresses mlab and other multi-interface node confgurations where
+- the generated boot image and network config files are mis-named.
+
 * Wed Apr 22 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-2
 - handle wireless settings back again
 
