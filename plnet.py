@@ -156,7 +156,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                                        (inter['IFNAME'],hwifname))
                         inter['IFNAME'] = hwifname
                 else:
-                    logger.log('net:InitInterfaces WARNING: mac addr %s for alias not found' %(hwaddr,alias))
+                    logger.log('net:InitInterfaces WARNING: mac addr %s for alias not found' %(hwaddr))
 
             if 'IFNAME' in inter:
                 # stupid RH /etc/sysconfig/network-scripts/ifup-aliases:new_interface()
