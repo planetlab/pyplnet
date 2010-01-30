@@ -85,10 +85,12 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             inter['BOOTPROTO'] = "static"
             inter['IPADDR'] = network['ip']
             inter['NETMASK'] = network['netmask']
-            inter['DNS1'] = network['dns1']
-            inter['DNS2'] = network['dns2']
             if network['is_primary']:
                 gateway = network['gateway']
+                if network['dns1']:
+                    inter['DNS1'] = network['dns1']
+                if network['dns2']:
+                    inter['DNS2'] = network['dns2']
 
         elif network['method'] == "dhcp":
             inter['BOOTPROTO'] = "dhcp"
