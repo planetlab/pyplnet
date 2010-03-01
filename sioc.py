@@ -6,6 +6,7 @@ import os
 import socket
 import fcntl
 import struct
+import subprocess
 
 SIOCGIFADDR = 0x8915
 SIOCGIFADDR_struct = "16xH2xI8x"
@@ -33,28 +34,16 @@ def gifaddr(interface):
     return None
 
 def gifconf():
-    try:
-        interfaces = os.listdir("/sys/class/net")
-    except:
-        interfaces = []
-    s = None
     ret = {}
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-        for interface in interfaces:
-            try:
-                ifreq = fcntl.ioctl(s.fileno(), SIOCGIFADDR,
-                                    struct.pack("16sH14x", interface, socket.AF_INET))
-                (family, ip) = struct.unpack(SIOCGIFADDR_struct, ifreq)
-                if family == socket.AF_INET:
-                    ret[interface] = _format_ip(ip)
-                else:
-                    raise Exception
-            except:
-                ret[interface] = "0.0.0.0"
-    finally:
-        if s is not None:
-            s.close()
+    ip = subprocess.Popen(["/sbin/ip", "-4", "addr", "ls"],
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, close_fds=True)
+    (stdout, stderr) = ip.communicate()
+    ip.wait()
+    for line in stdout.split("\n"):
+        if line.startswith("    inet "):
+            fields = line.split(" ")
+            ret[fields[-1]] = fields[5].split("/")[0]
     return ret
 
 def gifhwaddr(interface):
