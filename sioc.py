@@ -41,9 +41,18 @@ def gifconf():
     (stdout, stderr) = ip.communicate()
     ip.wait()
     for line in stdout.split("\n"):
-        if line.startswith("    inet "):
-            fields = line.split(" ")
-            ret[fields[-1]] = fields[5].split("/")[0]
+        line = line.strip()
+        if line =='':continue
+
+        fields = line.split(" ")
+        # clean up fields
+        for i in range(0,len(fields)): fields[i]=fields[i].strip()
+
+        if fields[0] == "inet":
+            # fields[-1] is the last column in fields, which has the interface name
+            # fields[1] has the IP address
+            ret[fields[-1]] = fields[1].split("/")[0]
+
     return ret
 
 def gifhwaddr(interface):
