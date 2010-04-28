@@ -39,20 +39,13 @@ def gifconf():
                           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE, close_fds=True)
     (stdout, stderr) = ip.communicate()
-    ip.wait()
+    # no wait is needed when using communicate
     for line in stdout.split("\n"):
-        line = line.strip()
-        if line =='':continue
-
-        fields = line.split(" ")
-        # clean up fields
-        for i in range(0,len(fields)): fields[i]=fields[i].strip()
-
-        if fields[0] == "inet":
+        fields = [ field.strip() for field in line.split() ]
+        if fields and fields[0] == "inet":
             # fields[-1] is the last column in fields, which has the interface name
-            # fields[1] has the IP address
+            # fields[1] has the IP address / netmask width 
             ret[fields[-1]] = fields[1].split("/")[0]
-
     return ret
 
 def gifhwaddr(interface):
