@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.3
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Wed Apr 28 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-6
+- aliases don't show up in /sys, so use /sbin/ip to get the configured IP addresses instead
+
 * Thu Feb 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-5
 - This is needed for 5.0, as GetSlivers now exposes 'interfaces' and no 'networks' anymore
 - this code can handle both..
