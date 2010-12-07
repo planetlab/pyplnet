@@ -89,6 +89,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             details['BOOTPROTO'] = "static"
             details['IPADDR'] = interface['ip']
             details['NETMASK'] = interface['netmask']
+            details['GATEWAY'] = interface['gateway']
             if interface['is_primary']:
                 gateway = interface['gateway']
                 if interface['dns1']:
@@ -278,6 +279,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                 val=val.strip()
                 f.write('%s="%s"\n' % (key,val))
         f.close()
+        os.close(fd)
 
         # compare whether two files are the same
         def comparefiles(a,b):
@@ -297,6 +299,45 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             except IOError, e:
                 return False
 
+        src_route_changed = False
+        if ('PRIMARY' not in details and 'GATEWAY' in details and
+            details['GATEWAY'] != ''):
+            i = len(dev) - 1
+            while dev[i - 1].isdigit():
+                i -= 1
+            table = 10 + int(dev[i:])
+            (fd, rule_tmpnam) = tempfile.mkstemp(dir=sysconfig)
+            os.write(fd, "from %s lookup %d\n" % (details['IPADDR'], table))
+            os.close(fd)
+            rule_dest = "%s/rule-%s" % (sysconfig, dev)
+            if not comparefiles(rule_tmpnam, rule_dest):
+                os.unlink(rule_dest)
+                os.rename(rule_tmpnam, rule_dest)
+                os.chmod(0644, rule_dest)
+                src_route_changed = True
+            else:
+                os.unlink(rule_tmpnam)
+            (fd, route_tmpnam) = tempfile.mkstemp(dir=sysconfig)
+            netmask = struct.unpack("I", socket.inet_aton(details['NETMASK']))[0]
+            ip = struct.unpack("I", socket.inet_aton(details['IPADDR']))[0]
+            network = socket.inet_ntoa(struct.pack("I", (ip & netmask)))
+            netmask = socket.ntohl(netmask)
+            i = 0
+            while (netmask & (1 << i)) == 0:
+                i += 1
+            prefix = 32 - i
+            os.write(fd, "%s/%d dev %s table %d\n" % (network, prefix, dev, table))
+            os.write(fd, "default via %s dev %s table %d\n" % (details['GATEWAY'], dev, table))
+            os.close(fd)
+            route_dest = "%s/route-%s" % (sysconfig, dev)
+            if not comparefiles(route_tmpnam, route_dest):
+                os.unlink(route_dest)
+                os.rename(route_tmpnam, route_dest)
+                os.chmod(0644, route_dest)
+                src_route_changed = True
+            else:
+                os.unlink(route_tmpnam)
+
         path = "%s/ifcfg-%s" % (sysconfig,dev)
         if not os.path.exists(path):
             logger.verbose('net:InitInterfaces adding configuration for %s' % dev)
@@ -305,7 +346,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             os.chmod(path,0644)
             newdevs.append(dev)
             
-        elif not comparefiles(tmpnam,path):
+        elif not comparefiles(tmpnam,path) or src_route_changed:
             logger.verbose('net:InitInterfaces Configuration change for %s' % dev)
             if not files_only:
                 logger.verbose('net:InitInterfaces ifdown %s' % dev)
