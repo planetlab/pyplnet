@@ -60,8 +60,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
     interfaces.reverse()
 
     for interface in interfaces:
-    	logger.verbose('net:InitInterfaces interface %d: %r'%(device_id,interface))
-    	logger.verbose('net:InitInterfaces macs = %r' % macs)
+        logger.verbose('net:InitInterfaces interface %d: %r'%(device_id,interface))
+        logger.verbose('net:InitInterfaces macs = %r' % macs)
         logger.verbose('net:InitInterfaces ips = %r' % ips)
         # Get interface name preferably from MAC address, falling back
         # on IP address.
@@ -74,9 +74,9 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         else:
             orig_ifname = None
 
-	if orig_ifname:
+        if orig_ifname:
             logger.verbose('net:InitInterfaces orig_ifname = %s' % orig_ifname)
-	
+
         details = {}
         details['ONBOOT']='yes'
         details['USERCTL']='no'
@@ -106,18 +106,16 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             if not interface['is_primary']:
                 details['DHCLIENTARGS'] = "-R subnet-mask"
 
-        try:
-            plc.GetInterfaceTags()
+        if 'interface_tag_ids' in interface:
             version = 4.3
-        except AttributeError:
-            version = 4.2
-
-        if version == 4.3:
             interface_tag_ids = "interface_tag_ids"
             interface_tag_id = "interface_tag_id"
+            name_key = "tagname"
         else:
+            version = 4.2
             interface_tag_ids = "nodenetwork_setting_ids"
             interface_tag_id = "nodenetwork_setting_id"
+            name_key = "name"
 
         if len(interface[interface_tag_ids]) > 0:
             try:
@@ -127,16 +125,11 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                     settings = plc.GetNodeNetworkSettings({interface_tag_id:interface[interface_tag_ids]})
             except:
                 logger.log("net:InitInterfaces FATAL: failed call GetInterfaceTags({'interface_tag_id':{%s})"% \
-                           interface['interface_tag_ids'])
+                           interface[interface_tag_ids])
                 failedToGetSettings = True
                 continue # on to the next interface
 
             for setting in settings:
-                # to explicitly set interface name
-                name_key = "name"
-                if version == 4.3:
-                    name_key = "tagname"
-                    
                 settingname = setting[name_key].upper()
                 if settingname in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER'):
                     details[settingname]=setting['value']
@@ -181,19 +174,22 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                 logger.log("net:InitInterfaces WARNING: interface alias (%s) not matched to an interface"% details['ALIAS'])
             device_id -= 1
         else:
-            if ('IFNAME' not in details) and not orig_ifname:
-                ifname="eth%d" % (device_id-1)
-                # should check if $ifname is an eth already defines
+            if 'IFNAME' in details:
+                ifname = details['IFNAME']
+                device_id -= 1
+            elif orig_ifname:
+                ifname = orig_ifname
+                device_id -= 1
+            else:
+                while True:
+                    ifname="eth%d" % (device_id-1)
+                    if ifname not in devices_map:
+                        break
+                    device_id += 1
                 if os.path.exists("%s/ifcfg-%s"%(sysconfig,ifname)):
                     logger.log("net:InitInterfaces WARNING: possibly blowing away %s configuration"%ifname)
-            else:
-		if ('IFNAME' not in details) and orig_ifname:
-                    ifname = orig_ifname
-                else:
-                    ifname = details['IFNAME']
-                device_id -= 1
             devices_map[ifname] = details
-                
+        device_id += 1 
     m = modprobe.Modprobe()
     try:
         m.input("%s/etc/modprobe.conf" % root)
@@ -286,7 +282,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         # compare whether two files are the same
         def comparefiles(a,b):
             try:
-		logger.verbose("net:InitInterfaces comparing %s with %s" % (a,b))
+                logger.verbose("net:InitInterfaces comparing %s with %s" % (a,b))
                 if not os.path.exists(a): return False
                 fb = open(a)
                 buf_a = fb.read()
