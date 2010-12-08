@@ -6,6 +6,7 @@ import socket
 import time
 import tempfile
 import errno
+import struct
 
 import sioc
 import modprobe
@@ -265,7 +266,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         
         # print the configuration values
         for (key, val) in details.iteritems():
-            if key not in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER'):
+            if key not in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER','GATEWAY'):
                 f.write('%s=%s\n' % (key, val))
 
         # print the configuration specific option values (if any)
@@ -279,7 +280,6 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                 val=val.strip()
                 f.write('%s="%s"\n' % (key,val))
         f.close()
-        os.close(fd)
 
         # compare whether two files are the same
         def comparefiles(a,b):
@@ -311,9 +311,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             os.close(fd)
             rule_dest = "%s/rule-%s" % (sysconfig, dev)
             if not comparefiles(rule_tmpnam, rule_dest):
-                os.unlink(rule_dest)
                 os.rename(rule_tmpnam, rule_dest)
-                os.chmod(0644, rule_dest)
+                os.chmod(rule_dest, 0644)
                 src_route_changed = True
             else:
                 os.unlink(rule_tmpnam)
@@ -331,9 +330,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             os.close(fd)
             route_dest = "%s/route-%s" % (sysconfig, dev)
             if not comparefiles(route_tmpnam, route_dest):
-                os.unlink(route_dest)
                 os.rename(route_tmpnam, route_dest)
-                os.chmod(0644, route_dest)
+                os.chmod(route_dest, 0644)
                 src_route_changed = True
             else:
                 os.unlink(route_tmpnam)
@@ -412,6 +410,7 @@ if __name__ == "__main__":
                       dest="program", default="plnet")
     (options, args) = parser.parse_args()
     if len(args) != 1 or options.root is None:
+        print sys.argv
         print >>sys.stderr, "Missing root or node_id"
         parser.print_help()
         sys.exit(1)
