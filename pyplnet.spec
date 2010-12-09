@@ -5,7 +5,7 @@
 
 %define name pyplnet
 %define version 4.3
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -55,6 +55,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Thu Dec 09 2010 Daniel Hokka Zakrisson <dhokka@cs.princeton.edu> - pyplnet-4.3-7
+- Secondary interface fixes and features.
+
 * Wed Apr 28 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-6
 - aliases don't show up in /sys, so use /sbin/ip to get the configured IP addresses instead
 
