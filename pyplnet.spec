@@ -1,8 +1,3 @@
-#
-# $Id$
-#
-%define url $URL$
-
 %define name pyplnet
 %define version 4.3
 %define taglevel 7
@@ -23,7 +18,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Vendor: PlanetLab
 Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
-URL: %(echo %{url} | cut -d ' ' -f 2)
+URL: %{SCMURL}
 
 Requires: python >= 2.4
 BuildRequires: python, python-devel
