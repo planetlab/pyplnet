@@ -1,6 +1,6 @@
 %define name pyplnet
 %define version 4.3
-%define taglevel 7
+%define taglevel 8
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -50,6 +50,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Mon Jan 24 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-8
+- no semantic change - just fixed specfile for git URL
+
 * Thu Dec 09 2010 Daniel Hokka Zakrisson <dhokka@cs.princeton.edu> - pyplnet-4.3-7
 - Secondary interface fixes and features.
 
