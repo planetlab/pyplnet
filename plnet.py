@@ -1,5 +1,4 @@
 #!/usr/bin/python /usr/bin/plcsh
-# $Id$
 
 import os
 import socket
@@ -267,7 +266,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         # print the configuration values
         for (key, val) in details.iteritems():
             if key not in ('IFNAME','ALIAS','CFGOPTIONS','DRIVER','GATEWAY'):
-                f.write('%s=%s\n' % (key, val))
+                f.write('%s="%s"\n' % (key, val))
 
         # print the configuration specific option values (if any)
         if 'CFGOPTIONS' in details:
