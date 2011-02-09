@@ -256,6 +256,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 
     # Process ifcfg-$dev changes / additions
     newdevs = []
+    table = 10
     for (dev, details) in devices_map.iteritems():
         (fd, tmpnam) = tempfile.mkstemp(dir=sysconfig)
         f = os.fdopen(fd, "w")
@@ -302,10 +303,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         src_route_changed = False
         if ('PRIMARY' not in details and 'GATEWAY' in details and
             details['GATEWAY'] != ''):
-            i = len(dev) - 1
-            while dev[i - 1].isdigit():
-                i -= 1
-            table = 10 + int(dev[i:])
+            table += 1
             (fd, rule_tmpnam) = tempfile.mkstemp(dir=sysconfig)
             os.write(fd, "from %s lookup %d\n" % (details['IPADDR'], table))
             os.close(fd)
