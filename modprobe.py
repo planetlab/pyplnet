@@ -1,7 +1,4 @@
 #
-# $Id$
-#
-
 """Modprobe is a utility to read/modify/write /etc/modprobe.conf"""
 
 import os

@@ -1,4 +1,3 @@
-# $Id$
 # vim:set ts=4 sw=4 expandtab:
 # (c) Copyright 2008 The Trustees of Princeton University
 

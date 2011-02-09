@@ -43,7 +43,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
     failedToGetSettings = False
 
     # NOTE: GetInterfaces/NodeNetworks does not necessarily order the interfaces
-    # returned.  Because 'interface'is decremented as each interface is processed,
+    # returned.  Because 'interface' is decremented as each interface is processed,
     # by the time is_primary=True (primary) interface is reached, the device
     # "eth%s" % interface, is not eth0.  But, something like eth-4, or eth-12.
     # This code sorts the interfaces, placing is_primary=True interfaces first.  

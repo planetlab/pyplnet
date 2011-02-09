@@ -5,8 +5,6 @@
 # Daniel Hokka Zakrisson <daniel@hozac.com>
 # Copyright (C) 2008 The Trustees of Princeton University
 #
-# $Id$
-#
 
 import os
 from distutils.core import setup, Extension
