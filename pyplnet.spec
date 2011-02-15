@@ -1,6 +1,6 @@
 %define name pyplnet
 %define version 4.3
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
@@ -50,6 +50,10 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Tue Feb 15 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-9
+- protect shell vars definition in ifcfg files with ""
+- tweaks in numbering rules
+
 * Mon Jan 24 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - pyplnet-4.3-8
 - no semantic change - just fixed specfile for git URL
 
