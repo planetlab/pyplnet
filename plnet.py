@@ -77,35 +77,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         if orig_ifname:
             logger.verbose('net:InitInterfaces orig_ifname = %s' % orig_ifname)
 
-        details = {}
-        details['ONBOOT']='yes'
-        details['USERCTL']='no'
-        if interface['mac']:
-            details['HWADDR'] = interface['mac']
-        if interface['is_primary']:
-            details['PRIMARY']='yes'
-
-        if interface['method'] == "static":
-            details['BOOTPROTO'] = "static"
-            details['IPADDR'] = interface['ip']
-            details['NETMASK'] = interface['netmask']
-            details['GATEWAY'] = interface['gateway']
-            if interface['is_primary']:
-                gateway = interface['gateway']
-                if interface['dns1']:
-                    details['DNS1'] = interface['dns1']
-                if interface['dns2']:
-                    details['DNS2'] = interface['dns2']
-
-        elif interface['method'] == "dhcp":
-            details['BOOTPROTO'] = "dhcp"
-            details['PERSISTENT_DHCLIENT'] = "yes"
-            if interface['hostname']:
-                details['DHCP_HOSTNAME'] = interface['hostname']
-            else:
-                details['DHCP_HOSTNAME'] = hostname 
-            if not interface['is_primary']:
-                details['DHCLIENTARGS'] = "-R subnet-mask"
+        details = prepDetails(interface)
 
         if 'interface_tag_ids' in interface:
             version = 4.3
@@ -141,6 +113,9 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                            "IWCONFIG", "IWPRIV" ] :
                     details [settingname] = setting['value']
                     details ['TYPE']='Wireless'
+                # Bridge setting
+                elif settingname in [ 'BRIDGE' ]:
+                    details['BRIDGE'] = setting['value']
                 else:
                     logger.log("net:InitInterfaces WARNING: ignored setting named %s"%setting[name_key])
 
@@ -174,6 +149,23 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             else:
                 logger.log("net:InitInterfaces WARNING: interface alias (%s) not matched to an interface"% details['ALIAS'])
             device_id -= 1
+        elif 'BRIDGE' in details:
+            #The bridge inherits the mac of the first attached interface.
+            if 'IFNAME' in details:
+                ifname = details['IFNAME']
+                device_id -= 1
+            elif orig_ifname:
+                ifname = orig_ifname
+                device_id -= 1
+            if 'PRIMARY' in details: del details['PRIMARY']
+            logger.log('net:InitInterfaces: Bridge detected. Adding %s to devices_map' % ifname)
+            devices_map[ifname] = details
+            bridgeName = details['BRIDGE']
+
+            logger.log('net:InitInterfaces: Adding bridge %s' % bridgeName)
+            bridgeDetails = prepDetails(interface)
+            bridgeDetails['TYPE']   = 'Bridge'
+            devices_map[bridgeName] = bridgeDetails
         else:
             if 'IFNAME' in details:
                 ifname = details['IFNAME']
@@ -191,6 +183,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
                     logger.log("net:InitInterfaces WARNING: possibly blowing away %s configuration"%ifname)
             devices_map[ifname] = details
         device_id += 1 
+    logger.log('net:InitInterfaces: Device map: %r' % devices_map)
     m = modprobe.Modprobe()
     try:
         m.input("%s/etc/modprobe.conf" % root)
@@ -224,7 +217,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
     lo = "ifcfg-lo"
     if lo in ifcfgs: ifcfgs.remove(lo)
 
-    # remove known devices from icfgs list
+    # remove known devices from ifcfgs list
     for (dev, details) in devices_map.iteritems():
         ifcfg = 'ifcfg-'+dev
         if ifcfg in ifcfgs: ifcfgs.remove(ifcfg)
@@ -393,6 +386,42 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             logger.verbose('net:InitInterfaces bringing up %s' % dev)
             os.system("/sbin/ifup %s" % dev)
 
+##
+# Prepare the interface details.
+#
+def prepDetails(interface):
+    details = {}
+    details['ONBOOT']  = 'yes'
+    details['USERCTL'] = 'no'
+    if interface['mac']:
+        details['HWADDR'] = interface['mac']
+    if interface['is_primary']:
+        details['PRIMARY'] = 'yes'
+
+    if interface['method'] == "static":
+        details['BOOTPROTO'] = "static"
+        details['IPADDR']    = interface['ip']
+        details['NETMASK']   = interface['netmask']
+        details['GATEWAY']   = interface['gateway']
+        if interface['is_primary']:
+            gateway = interface['gateway']
+            if interface['dns1']:
+                details['DNS1'] = interface['dns1']
+            if interface['dns2']:
+                details['DNS2'] = interface['dns2']
+
+    elif interface['method'] == "dhcp":
+        details['BOOTPROTO'] = "dhcp"
+        details['PERSISTENT_DHCLIENT'] = "yes"
+        if interface['hostname']:
+            details['DHCP_HOSTNAME'] = interface['hostname']
+        else:
+            details['DHCP_HOSTNAME'] = hostname
+        if not interface['is_primary']:
+            details['DHCLIENTARGS'] = "-R subnet-mask"
+
+    return details
+
 if __name__ == "__main__":
     import optparse
     import sys
@@ -406,6 +435,8 @@ if __name__ == "__main__":
     parser.add_option("-p", "--program", action="store", type="string",
                       dest="program", default="plnet")
     (options, args) = parser.parse_args()
+    options.root = ''
+    options.verbose = True
     if len(args) != 1 or options.root is None:
         print sys.argv
         print >>sys.stderr, "Missing root or node_id"
