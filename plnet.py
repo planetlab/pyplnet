@@ -77,7 +77,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         if orig_ifname:
             logger.verbose('net:InitInterfaces orig_ifname = %s' % orig_ifname)
 
-        details = prepDetails(interface)
+        details = prepDetails(interface, hostname)
 
         if 'interface_tag_ids' in interface:
             version = 4.3
@@ -389,7 +389,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 ##
 # Prepare the interface details.
 #
-def prepDetails(interface):
+def prepDetails(interface, hostname=''):
     details = {}
     details['ONBOOT']  = 'yes'
     details['USERCTL'] = 'no'
