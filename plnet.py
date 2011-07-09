@@ -59,6 +59,9 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
     interfaces.sort( compare_by('is_primary') )
     interfaces.reverse()
 
+    # The names of the bridge devices
+    bridgeDevices = []
+
     for interface in interfaces:
         logger.verbose('net:InitInterfaces interface %d: %r'%(device_id,interface))
         logger.verbose('net:InitInterfaces macs = %r' % macs)
@@ -157,8 +160,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             if 'IFNAME' in details:
                 ifname = details['IFNAME']
                 device_id -= 1
-            elif orig_ifname:
-                ifname = orig_ifname
+            else:
+                ifname = 'eth0'
                 device_id -= 1
             logger.log('net:InitInterfaces: Bridge detected. Adding %s to devices_map' % ifname)
             devices_map[ifname] = removeBridgedIfaceDetails(details)
@@ -166,6 +169,7 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 
             logger.log('net:InitInterfaces: Adding bridge %s' % bridgeName)
             bridgeDetails = prepDetails(interface)
+            bridgeDevices.append(bridgeName)
             bridgeDetails['TYPE']   = 'Bridge'
             devices_map[bridgeName] = bridgeDetails
         else:
@@ -384,9 +388,18 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
         # handle those correctly
         if getvar("SLAVE") == 'yes': continue
 
+        # Delay bringing up any bridge devices
+        if dev in bridgeDevices: continue
+
         if not files_only:
             logger.verbose('net:InitInterfaces bringing up %s' % dev)
             os.system("/sbin/ifup %s" % dev)
+
+    # Bring up the bridge devices
+    for bridge in bridgeDevices:
+        if not files_only and bridge in newdevs:
+            logger.verbose('net:InitInterfaces bringing up bridge %s' % bridge)
+            os.system("/sbin/ifup %s" % bridge)
 
 ##
 # Prepare the interface details.
