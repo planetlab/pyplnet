@@ -79,6 +79,9 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
 
         details = prepDetails(interface, hostname)
 
+        if interface['is_primary']:
+            gateway = interface['gateway']
+
         if 'interface_tag_ids' in interface:
             version = 4.3
             interface_tag_ids = "interface_tag_ids"
@@ -403,7 +406,6 @@ def prepDetails(interface, hostname=''):
         details['NETMASK']   = interface['netmask']
         details['GATEWAY']   = interface['gateway']
         if interface['is_primary']:
-            gateway = interface['gateway']
             if interface['dns1']:
                 details['DNS1'] = interface['dns1']
             if interface['dns2']:
