@@ -157,9 +157,8 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             elif orig_ifname:
                 ifname = orig_ifname
                 device_id -= 1
-            if 'PRIMARY' in details: del details['PRIMARY']
             logger.log('net:InitInterfaces: Bridge detected. Adding %s to devices_map' % ifname)
-            devices_map[ifname] = details
+            devices_map[ifname] = removeBridgedIfaceDetails(details)
             bridgeName = details['BRIDGE']
 
             logger.log('net:InitInterfaces: Adding bridge %s' % bridgeName)
@@ -420,6 +419,16 @@ def prepDetails(interface, hostname=''):
         if not interface['is_primary']:
             details['DHCLIENTARGS'] = "-R subnet-mask"
 
+    return details
+
+##
+# Remove duplicate entry from the bridged interface's configuration file.
+#
+def removeBridgedIfaceDetails(details):
+    for key in [ 'PRIMARY', 'PERSISTENT_DHCLIENT', 'DHCLIENTARGS', 'DHCP_HOSTNAME',
+                 'BOOTPROTO', 'IPADDR', 'NETMASK', 'GATEWAY', 'DNS1', 'DNS2' ]:
+        if key in details:
+            del details[key]
     return details
 
 if __name__ == "__main__":
