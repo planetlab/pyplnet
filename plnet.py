@@ -155,14 +155,10 @@ def InitInterfaces(logger, plc, data, root="", files_only=False, program="NodeMa
             else:
                 logger.log("net:InitInterfaces WARNING: interface alias (%s) not matched to an interface"% details['ALIAS'])
             device_id -= 1
-        elif 'BRIDGE' in details:
-            #The bridge inherits the mac of the first attached interface.
-            if 'IFNAME' in details:
-                ifname = details['IFNAME']
-                device_id -= 1
-            else:
-                ifname = 'eth0'
-                device_id -= 1
+        elif 'BRIDGE' in details and 'IFNAME' in details:
+            # The bridge inherits the mac of the first attached interface.
+            ifname = details['IFNAME']
+            device_id -= 1
             logger.log('net:InitInterfaces: Bridge detected. Adding %s to devices_map' % ifname)
             devices_map[ifname] = removeBridgedIfaceDetails(details)
             bridgeName = details['BRIDGE']
